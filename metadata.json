@@ -1,0 +1,6 @@
+{
+  "name": "Photo Editor",
+  "description": "An interactive Android Photo Editor featuring cropping, image adjustments (brightness, exposure, contrast, saturation, sharpness), freehand drawing with customizable brushes and colors, and gallery save/load functionality.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
