@@ -8,7 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -45,14 +44,14 @@ fun AdjustmentSlider(
                     Text(
                         text = name,
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
                         color = Color.LightGray
                     )
                 }
                 Text(
                     text = displayValue,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                     color = Color.White
                 )
             }

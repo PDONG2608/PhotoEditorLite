@@ -18,9 +18,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun CropControls(
-    onPresetSquareClick: () -> Unit,
-    onResetBoundaryClick: () -> Unit,
-    onApplyCropClick: () -> Unit
+    onIntent: (EditorIntent) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -40,7 +38,7 @@ fun CropControls(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Button(
-                onClick = onPresetSquareClick,
+                onClick = { onIntent(EditorIntent.OnPresetSquare) },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF232533)
                 ),
@@ -53,7 +51,7 @@ fun CropControls(
             }
 
             Button(
-                onClick = onResetBoundaryClick,
+                onClick = { onIntent(EditorIntent.OnResetBoundary) },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF232533)
                 ),
@@ -67,7 +65,7 @@ fun CropControls(
         }
 
         Button(
-            onClick = onApplyCropClick,
+            onClick = { onIntent(EditorIntent.ApplyCrop) },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             ),

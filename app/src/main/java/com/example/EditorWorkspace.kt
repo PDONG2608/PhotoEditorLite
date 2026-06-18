@@ -39,33 +39,24 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun EditorWorkspace(
-    originalBitmap: Bitmap?,
-    workingBitmap: Bitmap?,
-    adjustedWorkingBitmap: Bitmap?,
-    currentMode: EditMode,
-    isCheckingOriginal: Boolean,
-    onCheckingOriginalChange: (Boolean) -> Unit,
-    drawnPaths: List<DrawnPath>,
-    onDrawnPathsChange: (List<DrawnPath>) -> Unit,
-    currentPathPoints: List<Offset>,
-    onCurrentPathPointsChange: (List<Offset>) -> Unit,
-    brushSize: Float,
-    brushOpacity: Float,
-    activeColor: Color,
-    cropLeft: Float,
-    onCropLeftChange: (Float) -> Unit,
-    cropTop: Float,
-    onCropTopChange: (Float) -> Unit,
-    cropRight: Float,
-    onCropRightChange: (Float) -> Unit,
-    cropBottom: Float,
-    onCropBottomChange: (Float) -> Unit,
-    activeCropHandle: Int?,
-    onActiveCropHandleChange: (Int?) -> Unit,
+    uiState: EditorUiState,
+    onIntent: (EditorIntent) -> Unit,
     onImportPhotoClick: () -> Unit
 ) {
-    val currentBase = workingBitmap
-    val currentAdjusted = adjustedWorkingBitmap
+    val currentBase = uiState.workingBitmap
+    val currentAdjusted = uiState.adjustedWorkingBitmap
+    val currentMode = uiState.currentMode
+    val isCheckingOriginal = uiState.isCheckingOriginal
+    val drawnPaths = uiState.drawnPaths
+    val currentPathPoints = uiState.currentPathPoints
+    val brushSize = uiState.brushSize
+    val brushOpacity = uiState.brushOpacity
+    val activeColor = uiState.activeColor
+    val cropLeft = uiState.cropLeft
+    val cropTop = uiState.cropTop
+    val cropRight = uiState.cropRight
+    val cropBottom = uiState.cropBottom
+    val activeCropHandle = uiState.activeCropHandle
 
     if (currentBase == null) {
         // 1. EMPTY STATE / IMPORT COMPONENT
@@ -156,7 +147,7 @@ fun EditorWorkspace(
                                         val v = startOffset.y / actualImageHeight
                                         val xBmp = u * activeRenderBmp.width
                                         val yBmp = v * activeRenderBmp.height
-                                        onCurrentPathPointsChange(listOf(Offset(xBmp, yBmp)))
+                                        onIntent(EditorIntent.UpdateCurrentPathPoints(listOf(Offset(xBmp, yBmp))))
                                     },
                                     onDrag = { change, dragAmount ->
                                         change.consume()
@@ -165,19 +156,21 @@ fun EditorWorkspace(
                                         val v = (screenPos.y / actualImageHeight).coerceIn(0f, 1f)
                                         val xBmp = u * activeRenderBmp.width
                                         val yBmp = v * activeRenderBmp.height
-                                        onCurrentPathPointsChange(currentPathPoints + Offset(xBmp, yBmp))
+                                        onIntent(EditorIntent.UpdateCurrentPathPoints(currentPathPoints + Offset(xBmp, yBmp)))
                                     },
                                     onDragEnd = {
                                         if (currentPathPoints.isNotEmpty()) {
-                                            onDrawnPathsChange(
-                                                drawnPaths + DrawnPath(
-                                                    points = currentPathPoints,
-                                                    color = activeColor,
-                                                    strokeWidth = brushSize,
-                                                    opacity = brushOpacity
+                                            onIntent(
+                                                EditorIntent.UpdateDrawnPaths(
+                                                    drawnPaths + DrawnPath(
+                                                        points = currentPathPoints,
+                                                        color = activeColor,
+                                                        strokeWidth = brushSize,
+                                                        opacity = brushOpacity
+                                                    )
                                                 )
                                             )
-                                            onCurrentPathPointsChange(emptyList())
+                                            onIntent(EditorIntent.UpdateCurrentPathPoints(emptyList()))
                                         }
                                     }
                                 )
@@ -198,7 +191,7 @@ fun EditorWorkspace(
                                             (startOffset - br).getDistance() < radiusThresh -> 3
                                             else -> null
                                         }
-                                        onActiveCropHandleChange(handle)
+                                        onIntent(EditorIntent.SetActiveCropHandle(handle))
                                     },
                                     onDrag = { change, dragAmount ->
                                         val handle = activeCropHandle ?: return@detectDragGestures
@@ -209,25 +202,25 @@ fun EditorWorkspace(
 
                                         when (handle) {
                                             0 -> { // Top-Left
-                                                onCropLeftChange((cropLeft + dx).coerceIn(0f, cropRight - 0.15f))
-                                                onCropTopChange((cropTop + dy).coerceIn(0f, cropBottom - 0.15f))
+                                                onIntent(EditorIntent.UpdateCropLeft((cropLeft + dx).coerceIn(0f, cropRight - 0.15f)))
+                                                onIntent(EditorIntent.UpdateCropTop((cropTop + dy).coerceIn(0f, cropBottom - 0.15f)))
                                             }
                                             1 -> { // Top-Right
-                                                onCropRightChange((cropRight + dx).coerceIn(cropLeft + 0.15f, 1f))
-                                                onCropTopChange((cropTop + dy).coerceIn(0f, cropBottom - 0.15f))
+                                                onIntent(EditorIntent.UpdateCropRight((cropRight + dx).coerceIn(cropLeft + 0.15f, 1f)))
+                                                onIntent(EditorIntent.UpdateCropTop((cropTop + dy).coerceIn(0f, cropBottom - 0.15f)))
                                             }
                                             2 -> { // Bottom-Left
-                                                onCropLeftChange((cropLeft + dx).coerceIn(0f, cropRight - 0.15f))
-                                                onCropBottomChange((cropBottom + dy).coerceIn(cropTop + 0.15f, 1f))
+                                                onIntent(EditorIntent.UpdateCropLeft((cropLeft + dx).coerceIn(0f, cropRight - 0.15f)))
+                                                onIntent(EditorIntent.UpdateCropBottom((cropBottom + dy).coerceIn(cropTop + 0.15f, 1f)))
                                             }
                                             3 -> { // Bottom-Right
-                                                onCropRightChange((cropRight + dx).coerceIn(cropLeft + 0.15f, 1f))
-                                                onCropBottomChange((cropBottom + dy).coerceIn(cropTop + 0.15f, 1f))
+                                                onIntent(EditorIntent.UpdateCropRight((cropRight + dx).coerceIn(cropLeft + 0.15f, 1f)))
+                                                onIntent(EditorIntent.UpdateCropBottom((cropBottom + dy).coerceIn(cropTop + 0.15f, 1f)))
                                             }
                                         }
                                     },
                                     onDragEnd = {
-                                        onActiveCropHandleChange(null)
+                                        onIntent(EditorIntent.SetActiveCropHandle(null))
                                     }
                                 )
                             }
@@ -353,10 +346,10 @@ fun EditorWorkspace(
                                 .background(Color.Black.copy(0.6f))
                                 .pointerInput(Unit) {
                                     detectDragGestures(
-                                        onDragStart = { onCheckingOriginalChange(true) },
+                                        onDragStart = { onIntent(EditorIntent.SetCheckingOriginal(true)) },
                                         onDrag = { change, _ -> change.consume() },
-                                        onDragEnd = { onCheckingOriginalChange(false) },
-                                        onDragCancel = { onCheckingOriginalChange(false) }
+                                        onDragEnd = { onIntent(EditorIntent.SetCheckingOriginal(false)) },
+                                        onDragCancel = { onIntent(EditorIntent.SetCheckingOriginal(false)) }
                                     )
                                 }
                                 .padding(horizontal = 10.dp, vertical = 6.dp)

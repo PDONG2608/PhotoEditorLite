@@ -52,16 +52,14 @@ fun getSpectrumColor(fraction: Float): Color {
 
 @Composable
 fun DrawControls(
-    drawnPathsExist: Boolean,
-    onUndoClick: () -> Unit,
-    onDeleteSweepClick: () -> Unit,
-    activeColor: Color,
-    onColorChange: (Color) -> Unit,
-    brushSize: Float,
-    onBrushSizeChange: (Float) -> Unit,
-    brushOpacity: Float,
-    onBrushOpacityChange: (Float) -> Unit
+    uiState: EditorUiState,
+    onIntent: (EditorIntent) -> Unit
 ) {
+    val drawnPathsExist = uiState.drawnPaths.isNotEmpty()
+    val activeColor = uiState.activeColor
+    val brushSize = uiState.brushSize
+    val brushOpacity = uiState.brushOpacity
+
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // Header + Undo Rows
         Row(
@@ -78,7 +76,7 @@ fun DrawControls(
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 IconButton(
-                    onClick = onUndoClick,
+                    onClick = { onIntent(EditorIntent.UndoDraw) },
                     enabled = drawnPathsExist,
                     modifier = Modifier
                         .size(32.dp)
@@ -96,7 +94,7 @@ fun DrawControls(
                 }
 
                 IconButton(
-                    onClick = onDeleteSweepClick,
+                    onClick = { onIntent(EditorIntent.ClearDraw) },
                     enabled = drawnPathsExist,
                     modifier = Modifier
                         .size(32.dp)
@@ -142,7 +140,7 @@ fun DrawControls(
                             color = if (activeColor == color) Color.White else Color.Transparent,
                             shape = CircleShape
                         )
-                        .clickable { onColorChange(color) }
+                        .clickable { onIntent(EditorIntent.UpdateActiveColor(color)) }
                 )
             }
         }
@@ -180,7 +178,7 @@ fun DrawControls(
                     .pointerInput(Unit) {
                         detectDragGestures { change, _ ->
                             val fraction = (change.position.x / size.width).coerceIn(0f, 1f)
-                            onColorChange(getSpectrumColor(fraction))
+                            onIntent(EditorIntent.UpdateActiveColor(getSpectrumColor(fraction)))
                         }
                     }
             )
@@ -201,7 +199,7 @@ fun DrawControls(
                 }
                 Slider(
                     value = brushSize,
-                    onValueChange = onBrushSizeChange,
+                    onValueChange = { onIntent(EditorIntent.UpdateBrushSize(it)) },
                     valueRange = 2f..80f,
                     colors = SliderDefaults.colors(
                         thumbColor = MaterialTheme.colorScheme.primary,
@@ -220,7 +218,7 @@ fun DrawControls(
                 }
                 Slider(
                     value = brushOpacity,
-                    onValueChange = onBrushOpacityChange,
+                    onValueChange = { onIntent(EditorIntent.UpdateBrushOpacity(it)) },
                     valueRange = 0.1f..1.0f,
                     colors = SliderDefaults.colors(
                         thumbColor = MaterialTheme.colorScheme.primary,

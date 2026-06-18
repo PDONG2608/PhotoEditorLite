@@ -21,17 +21,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun AdjustControls(
-    brightness: Float,
-    exposure: Float,
-    contrast: Float,
-    saturation: Float,
-    sharpness: Float,
-    onBrightnessChange: (Float) -> Unit,
-    onExposureChange: (Float) -> Unit,
-    onContrastChange: (Float) -> Unit,
-    onSaturationChange: (Float) -> Unit,
-    onSharpnessChange: (Float) -> Unit,
-    onReset: () -> Unit
+    uiState: EditorUiState,
+    onIntent: (EditorIntent) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -52,7 +43,7 @@ fun AdjustControls(
             )
 
             TextButton(
-                onClick = onReset,
+                onClick = { onIntent(EditorIntent.ResetAdjustments) },
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Icon(Icons.Default.RestartAlt, contentDescription = null, modifier = Modifier.size(14.dp))
@@ -64,50 +55,50 @@ fun AdjustControls(
         // Brightness
         AdjustmentSlider(
             name = "Độ Sáng (Brightness)",
-            value = brightness,
+            value = uiState.brightness,
             valueRange = -100f..100f,
-            displayValue = "${brightness.toInt()}",
-            onValueChange = onBrightnessChange,
+            displayValue = "${uiState.brightness.toInt()}",
+            onValueChange = { onIntent(EditorIntent.UpdateBrightness(it)) },
             icon = Icons.Default.LightMode
         )
 
         // Exposure
         AdjustmentSlider(
             name = "Phơi Sáng (Exposure)",
-            value = exposure,
+            value = uiState.exposure,
             valueRange = -2.0f..2.0f,
-            displayValue = String.format("%.2f", exposure),
-            onValueChange = onExposureChange,
+            displayValue = String.format("%.2f", uiState.exposure),
+            onValueChange = { onIntent(EditorIntent.UpdateExposure(it)) },
             icon = Icons.Default.Exposure
         )
 
         // Contrast
         AdjustmentSlider(
             name = "Tương Phản (Contrast)",
-            value = contrast,
+            value = uiState.contrast,
             valueRange = 0.2f..2.0f,
-            displayValue = String.format("%.2f", contrast),
-            onValueChange = onContrastChange,
+            displayValue = String.format("%.2f", uiState.contrast),
+            onValueChange = { onIntent(EditorIntent.UpdateContrast(it)) },
             icon = Icons.Default.Contrast
         )
 
         // Saturation
         AdjustmentSlider(
             name = "Độ Bão Hòa (Saturation)",
-            value = saturation,
+            value = uiState.saturation,
             valueRange = 0.0f..2.0f,
-            displayValue = String.format("%.2f", saturation),
-            onValueChange = onSaturationChange,
+            displayValue = String.format("%.2f", uiState.saturation),
+            onValueChange = { onIntent(EditorIntent.UpdateSaturation(it)) },
             icon = Icons.Default.Palette
         )
 
         // Sharpness
         AdjustmentSlider(
             name = "Độ Nét (Sharpness)",
-            value = sharpness,
+            value = uiState.sharpness,
             valueRange = 0.0f..3.0f,
-            displayValue = String.format("%.2f", sharpness),
-            onValueChange = onSharpnessChange,
+            displayValue = String.format("%.2f", uiState.sharpness),
+            onValueChange = { onIntent(EditorIntent.UpdateSharpness(it)) },
             icon = Icons.Default.FilterCenterFocus
         )
     }
